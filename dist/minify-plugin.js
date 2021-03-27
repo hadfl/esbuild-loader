@@ -55,10 +55,11 @@ class ESBuildMinifyPlugin {
         this.options.sourcemap === undefined ?
             devtool && devtool.includes('source-map') :
             this.options.sourcemap);
-        const { include, exclude, ...transformOptions } = this.options;
+        const { css: minifyCss, include, exclude, ...transformOptions } = this.options;
         const transforms = assetNames
             .filter(assetName => ((isJsFile.test(assetName) ||
-            isCssFile.test(assetName)) &&
+            (minifyCss &&
+                isCssFile.test(assetName))) &&
             ModuleFilenameHelpers_1.matchObject({ include, exclude }, assetName)))
             .map((assetName) => [
             assetName,
