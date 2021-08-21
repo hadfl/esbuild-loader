@@ -316,4 +316,33 @@ describe.each([
 		expect(assets).toHaveProperty(['named-chunk-bar.js']);
 		expect(getFile(stats, '/dist/named-chunk-bar.js').content).toMatchSnapshot();
 	});
+
+	test('#200 test DefinePlugin', async () => {
+		const stats = await build(
+			webpack,
+			{
+				'/src/index.js': 'module.exports = process.env.API_URL',
+			},
+			(config) => {
+				config.module.rules.push({
+					test: /\.jsx$/,
+					loader: 'esbuild-loader',
+					options: {
+						target: 'es2020',
+						loader: 'jsx',
+					},
+				});
+
+				config.plugins.push(
+					// @ts-expect-error webpack 4/5 type error
+					new webpack.DefinePlugin({
+						'process.env.API_URL': JSON.stringify('https://api.server.com'),
+					}),
+				);
+			},
+		);
+
+		const file = getFile(stats, '/dist/index.js');
+		expect(file.content).toContain('https://api.server.com');
+	});
 });
